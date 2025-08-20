@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# InDesign temp files
+*.tmp
+*.temp
+*~
+
+# Test exports
+TEST EXPORT/
+test-exports/
+exports/
+
+# Logs
+*.log
+conversion-log.txt
+
+# External repositories
+imgly-idml-importer/
