@@ -1,10 +1,10 @@
-# Img.ly IDML Optimizer
+# IB ECT IDML Optimizer
 
-An InDesign script that optimizes IDML files for seamless import into Img.ly by converting incompatible file formats while preserving native design elements.
+An InDesign script that optimizes IDML files for seamless import into IB ECT by converting incompatible file formats while preserving native design elements.
 
 ## Overview
 
-This script addresses the key limitations of Img.ly's IDML importer by automatically converting problematic file formats:
+This script addresses the key limitations of IB ECT's IDML importer by automatically converting problematic file formats:
 
 - **AI/EPS files** → SVG (preserves vector quality)
 - **PSD files** → PNG (raster conversion)
@@ -22,7 +22,7 @@ This script addresses the key limitations of Img.ly's IDML importer by automatic
 
 ### ❌ What It Doesn't Do (By Design)
 - **No "Smart Bake"**: Doesn't rasterize native shapes
-- **No Frame Processing**: Lets Img.ly handle native elements
+- **No Frame Processing**: Lets IB ECT handle native elements
 - **No Unnecessary Conversions**: Preserves maximum design quality
 
 ## Requirements
@@ -49,13 +49,13 @@ This script addresses the key limitations of Img.ly's IDML importer by automatic
 3. **Choose output folder** when prompted
 4. **Grant permissions** to Illustrator/Photoshop if prompted
 5. **Wait for processing** (typically 30-60 seconds)
-6. **Import the generated IDML** into Img.ly
+6. **Import the generated IDML** into IB ECT
 
 ## Output Files
 
 The script creates a timestamped job folder containing:
 
-- `[filename]-imgly-optimized.idml` - Optimized IDML file for Img.ly
+- `[filename]-ib-ect-optimized.idml` - Optimized IDML file for IB ECT
 - `Links/` - Converted SVG/PNG files (embedded in IDML)
 - `conversion-log.txt` - Detailed processing log
 - `summary.txt` - Human-readable summary
@@ -93,15 +93,15 @@ var CFG = {
 - Check if files are embedded (script will unembed them automatically)
 - Ensure file extensions are recognized (.ai, .eps, .psd, .pdf)
 
-**Poor Img.ly import quality**
+**Poor IB ECT import quality**
 - This optimizer addresses file format issues
 - For shape/path issues, consider the upcoming shape-to-SVG enhancement
 
 ## Development
 
-This script was developed to solve real-world Img.ly import issues by:
+This script was developed to solve real-world IB ECT import issues by:
 
-1. **Analyzing Img.ly importer limitations** from documentation and code
+1. **Analyzing IB ECT importer limitations** from documentation and code
 2. **Identifying over-processing issues** in existing solutions
 3. **Implementing minimal intervention** approach
 4. **Preserving maximum design fidelity** while solving compatibility issues
@@ -112,4 +112,4 @@ MIT License - Feel free to modify and distribute.
 
 ## Contributing
 
-Issues and pull requests welcome! This is an active project addressing real Img.ly integration challenges.
+Issues and pull requests welcome! This is an active project addressing real IB ECT integration challenges.

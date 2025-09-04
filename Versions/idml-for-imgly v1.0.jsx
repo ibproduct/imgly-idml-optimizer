@@ -65,7 +65,7 @@ var CFG = {
   excludePatterns: [/*"^_ignore"*/],
 
   // IDML filename suffix
-  idmlSuffix: "-ib-ect-optimized"
+  idmlSuffix: "-imgly-optimized"
 };
 
 // =============================
@@ -155,89 +155,9 @@ msg("Job: " + jobName);
 msg("Time: " + new Date().toString());
 
 // =============================
-// Step 1: Package document FIRST (original remains untouched)
+// Step 1: Unembed AI/EPS/PSD/PDF files (so they get copied to Links folder)
 // =============================
-msg("Packaging document…");
-
-// Save document first to ensure it's in a good state
-try {
-  doc.save();
-  msg("Document saved successfully");
-} catch(e) {
-  msg("Warning: Could not save document - " + e.message);
-}
-
-// Check for missing fonts before packaging
-var missingFonts = [];
-try {
-  var usedFonts = doc.fonts.everyItem().getElements();
-  for(var f=0; f<usedFonts.length; f++){
-    if(usedFonts[f].status != FontStatus.INSTALLED){
-      missingFonts.push(usedFonts[f].fullName);
-    }
-  }
-  if(missingFonts.length > 0) {
-    msg("Warning: Missing fonts detected: " + missingFonts.join(", "));
-  }
-} catch(e) {
-  msg("Could not check font status: " + e.message);
-}
-
-var packagedReport = new File(jobFolder.fsName + "/package-report.txt");
-
-// Try packaging with error handling
-try {
-  msg("Attempting to package document...");
-  doc.packageForPrint(
-    jobFolder,         // to
-    true,              // copy fonts
-    true,              // copy linked graphics
-    true,              // copy profiles
-    true,              // update graphics
-    CFG.includeHiddenLayers, // include hidden layers
-    true,              // ignore preflight errors - CHANGED to true
-    true,              // create report
-    true,              // force save
-    false,             // include IDML
-    "Packaged for Img.ly export" // version comments
-  );
-  msg("Package operation completed");
-} catch(e) {
-  panic("Package operation failed: " + e.message + "\nCheck for missing fonts, file permissions, or preflight errors.");
-}
-
-// Check if packaging actually worked
-var linksFolder = new Folder(jobFolder.fsName + "/Links");
-var packagedInddFiles = jobFolder.getFiles(function(f){ return f instanceof File && /\.indd$/i.test(f.displayName); });
-
-if(!linksFolder.exists && packagedInddFiles.length === 0) {
-  panic("Package failed completely - no INDD or Links folder created.\nPossible causes:\n- Missing fonts: " + (missingFonts.length > 0 ? missingFonts.join(", ") : "none detected") + "\n- File permissions\n- Document corruption");
-}
-
-if(!linksFolder.exists) {
-  msg("No Links folder created - document may have no linked files or all links are embedded");
-  msg("Creating empty Links folder to continue processing");
-  ensureFolder(linksFolder);
-}
-
-// Open packaged INDD (original document remains untouched)
-var packagedIndd = (function(){
-  var files = jobFolder.getFiles(function(f){ return f instanceof File && /\.indd$/i.test(f.displayName); });
-  if(files.length===0) panic("Packaged INDD not found.");
-  return files[0];
-})();
-
-msg("Opening packaged document: " + packagedIndd.fsName);
-app.open(packagedIndd);
-doc = app.activeDocument; // switch handle to packaged doc
-
-msg("✓ Now working on packaged document: " + doc.name);
-msg("Original document remains completely unchanged");
-
-// =============================
-// Step 2: Unembed AI/EPS/PSD/PDF files in PACKAGED document only
-// =============================
-msg("Unembedding AI/EPS/PSD/PDF files in packaged document…");
+msg("Unembedding AI/EPS/PSD/PDF files…");
 var unembedded = 0;
 for(var i=0; i<doc.links.length; i++){
   try{
@@ -254,16 +174,41 @@ for(var i=0; i<doc.links.length; i++){
       link.unembed();
       unembedded++;
     }
-  }catch(e){
-    msg("Warning: Could not unembed link - " + e.message);
-  }
+  }catch(e){}
 }
-if(unembedded > 0) {
-  msg("✓ Unembedded " + unembedded + " AI/EPS/PSD/PDF files in packaged document");
-  msg("These files are now available in the Links folder for conversion");
-} else {
-  msg("No embedded AI/EPS/PSD/PDF files found to unembed");
-}
+if(unembedded > 0) msg("Unembedded " + unembedded + " AI/EPS/PSD/PDF files for processing");
+
+// =============================
+// Step 2: Package document
+// =============================
+msg("Packaging document…");
+var packagedReport = new File(jobFolder.fsName + "/package-report.txt");
+// packageForPrint returns void; side effects create INDD+Links
+doc.packageForPrint(
+  jobFolder,         // to
+  true,              // copy fonts
+  true,              // copy linked graphics
+  true,              // copy profiles
+  true,              // update graphics
+  CFG.includeHiddenLayers, // include hidden layers
+  false,             // ignore preflight errors
+  true,              // create report
+  true,              // force save
+  false,             // include IDML
+  "Packaged for Img.ly export" // version comments
+);
+
+var linksFolder = new Folder(jobFolder.fsName + "/Links");
+if(!linksFolder.exists) panic("Package failed — no Links folder found.");
+
+// Open packaged INDD
+var packagedIndd = (function(){
+  var files = jobFolder.getFiles(function(f){ return f instanceof File && /\.indd$/i.test(f.displayName); });
+  if(files.length===0) panic("Packaged INDD not found.");
+  return files[0];
+})();
+app.open(packagedIndd);
+doc = app.activeDocument; // switch handle to packaged doc
 
 // =============================
 // Step 3: Collect links (recursive) + build conversion plan
@@ -513,8 +458,8 @@ for(var iLink=0;iLink<doc.links.length;iLink++){
 }
 msg("Relinked: " + relinked + ", Skipped: " + skipped);
 
-// Embed all links in packaged document
-msg("Embedding all links in packaged document…");
+// Embed all
+msg("Embedding all links…");
 for(var j=doc.links.length-1;j>=0;j--){ try{ doc.links[j].unlink(); }catch(e){} }
 
 // =============================
